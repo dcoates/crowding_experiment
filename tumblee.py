@@ -12,9 +12,10 @@ import conditions
 backcol= (  0, 0, 0 ) # Mid-gray
 targcol= ( -1,-1,-1) # Black
 fullscr=True # Set to True when not debugging (Ready to run)
-monitor_dims = (1024,768)
+monitor_dims_pix = (1920,1080)
+monitor_dims_mm = (400,225)
 distance_mm = 1080.0
-fixation_pos_pix = (0,370)
+fixation_pos_pix = (0,450)
 target_loc_deg   = (0,9)
 ntrials = 30
 stimulus_duration =  0.150  # in sec use -1 for infinite
@@ -41,8 +42,7 @@ class experiment_runner():
 
     def run(self):
         global thisStair
-        # TODO: Monitor Info: (dimensions, ?, center of target X, distance (mm?) )
-        exper = conditions.experimental_setup( monitor_dims, distance_mm, fixation_pos_pix, target_loc_deg )
+        exper = conditions.experimental_setup( monitor_dims_pix, monitor_dims_mm, distance_mm, fixation_pos_pix, target_loc_deg )
 
         font = conditions.fontArial( targcol )
         stimHeightDeg = 2.25 # dummy (overwritten below)

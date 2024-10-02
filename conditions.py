@@ -7,10 +7,10 @@ def  rad2deg( angle ):
     return angle * 180.0 / numpy.pi
 
 class experimental_setup():
-	def __init__(self, screendim, distance, fixation_pos_pix, target_loc_deg ):
-		self.screendim = screendim
+	def __init__(self, screendim_pix, screendim_mm, distance, fixation_pos_pix, target_loc_deg ):
+		self.screendim = screendim_pix
 		#screensize = 100.0 / 36.0 # pix/mm for Sony Trinitron at 1024x768 (or ~ 768/284)
-		self.screensize = screendim[1] / 225 #84.0 # height is 284 mm, 768 pixels
+		self.screensize = screendim_pix[1] / screendim_mm[1] #84.0 # height is 284 mm, 768 pixels. TODO: what is "/225?"
 		self.distance = distance 
 		self.stim_ecc_deg = target_loc_deg[1] #distance from fixation to center of 'o' in degrees
 		self.xloc_fixation_pix = fixation_pos_pix[0] #distance from fixation to ceter of screen in pixels
