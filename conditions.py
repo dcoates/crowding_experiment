@@ -7,14 +7,16 @@ def  rad2deg( angle ):
     return angle * 180.0 / numpy.pi
 
 class experimental_setup():
-	def __init__(self, screendim, distance, stim_ecc_deg, yloc_fixation_pix=0 ):
+	def __init__(self, screendim, distance, fixation_pos_pix, target_loc_deg ):
 		self.screendim = screendim
 		#screensize = 100.0 / 36.0 # pix/mm for Sony Trinitron at 1024x768 (or ~ 768/284)
 		self.screensize = screendim[1] / 225 #84.0 # height is 284 mm, 768 pixels
 		self.distance = distance 
-		self.stim_ecc_deg = stim_ecc_deg #distance from fixation to center of 'o' in degrees
-		self.yloc_fixation_pix = yloc_fixation_pix #distance from fixation to ceter of screen in pixels
-		self.yloc_pix = -distance * numpy.tan( deg2rad(stim_ecc_deg))* self.screensize + yloc_fixation_pix#y-location of the center of the letter from center of screen
+		self.stim_ecc_deg = target_loc_deg[1] #distance from fixation to center of 'o' in degrees
+		self.xloc_fixation_pix = fixation_pos_pix[0] #distance from fixation to ceter of screen in pixels
+		self.yloc_fixation_pix = fixation_pos_pix[1] #distance from fixation to ceter of screen in pixels
+		self.yloc_pix = -distance * numpy.tan( deg2rad(self.stim_ecc_deg))* self.screensize + self.yloc_fixation_pix#y-location of the center of the letter from center of screen
+		self.xloc_pix=0
 
 	def deg2pix( self, angle ):
 		return numpy.round( self.distance * self.screensize * (numpy.tan ( deg2rad(self.stim_ecc_deg + angle / 2.0)) -

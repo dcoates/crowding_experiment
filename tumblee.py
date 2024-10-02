@@ -11,26 +11,26 @@ import conditions
 
 backcol= (  0, 0, 0 ) # Mid-gray
 targcol= ( -1,-1,-1) # Black
-fullscr=False # Set to True when not debugging (Ready to run)
+fullscr=True # Set to True when not debugging (Ready to run)
 monitor_dims = (1024,768)
-target_deg_ecc = 9
 distance_mm = 1080.0
-fixation_offset = 370
-xpos=0; ypos=0
-ntrials = 20
+fixation_pos_pix = (0,370)
+target_loc_deg   = (0,9)
+ntrials = 30
 stimulus_duration =  0.150  # in sec use -1 for infinite
 mask_duration = 0
 targets = [0,90,180,270]
-condition = "both" # or "radial" or "tangential"
+condition = "tangential" # "radial", "tangential", or "both"
 
 SubjectName = 'drc_test'
 repeats = 1
-#spacings = [1.5, 3.0, 99.0 ]
-spacings = [99]
+spacings = [1.5, 3.0, 99.0 ]
+#spacings = [3.0]
 
 # Randomize order of spacings:
 allspacings = numpy.tile( spacings, (1, repeats ))[0]
 allspacings = numpy.random.permutation( allspacings )
+
 
 def buildtrialseq( vals, ntrials ):
 	return numpy.random.permutation( numpy.tile ( vals, int(numpy.ceil( float(ntrials)/len(vals)) )) )[0:ntrials]
@@ -40,8 +40,9 @@ class experiment_runner():
         return
 
     def run(self):
+        global thisStair
         # TODO: Monitor Info: (dimensions, ?, center of target X, distance (mm?) )
-        exper = conditions.experimental_setup( monitor_dims, distance_mm, target_deg_ecc, fixation_offset )
+        exper = conditions.experimental_setup( monitor_dims, distance_mm, fixation_pos_pix, target_loc_deg )
 
         font = conditions.fontArial( targcol )
         stimHeightDeg = 2.25 # dummy (overwritten below)
@@ -91,7 +92,7 @@ class experiment_runner():
         else: #unflanked
             stims = [ targ ]
 
-        outfilename = "results/%s_%s_%s_%s.csv" % (SubjectName, condition, str(spacingMult), time.strftime("%m%d%Y", time.localtime() ) )
+        outfilename = "results/%s_%s_%s_%s.csv" % (SubjectName, condition, str(spacingMult), time.strftime("%m%d%Y_%H%M", time.localtime() ) )
         outfile = open(outfilename, "wt")
         trialNum=0
 
@@ -107,8 +108,6 @@ class experiment_runner():
         fliprate = numpy.mean( savetimes[20:80] )
         print ('fliprate=%f ms (%f Hz)' % (fliprate,1.0/fliprate) )
 
-        print( targseq) 
-
         fixation.setText('Ready. Press a key.')
         fixation.draw()
         myWin.flip()
@@ -121,7 +120,7 @@ class experiment_runner():
         myWin.flip()
         event.waitKeys()
 
-        thisStair = pd.StairHandler(startVal=4, nTrials=50, nUp=1, nDown=3, minVal = 0.5, maxVal=7, stepSizes=[3,2,1,0.75,0.5,0.5,0.2,0.2,0.2,0.2,0.2,0.2] ) #, stepSizes=[4,2,1,1,1,1,1,1])
+        thisStair = pd.StairHandler(startVal=4, nTrials=50, nUp=1, nDown=3, minVal = 0.01, maxVal=7, stepSizes=[2,1,0.5,0.25,0.125,0.125,0.125,0.125] ) #, stepSizes=[4,2,1,1,1,1,1,1])
 
         done = False
         while not done and trialNum<maxtrials:
@@ -131,7 +130,6 @@ class experiment_runner():
 
             # Get the parameters (orientation, size, etc.) for the next trial:
             [stim.getTrial(trialNum) for stim in stims]
-            print(targ.ori)
 
             try:
                 sval = thisStair.next()
@@ -143,10 +141,10 @@ class experiment_runner():
             for stim in stims:
                 stim.height=font.let_height_ptfont
 
-            left.pos =	(spacingMult * exper.deg2pix(sval), exper.yloc_pix )
-            right.pos =	 (-spacingMult * exper.deg2pix(sval), exper.yloc_pix )
-            up.pos =	(spacingMult * exper.deg2pix(sval), exper.yloc_pix )
-            down.pos =	 (-spacingMult * exper.deg2pix(sval), exper.yloc_pix )
+            left.pos =	( spacingMult * exper.deg2pix(sval)+exper.xloc_pix, exper.yloc_pix )
+            right.pos = (-spacingMult * exper.deg2pix(sval)+exper.xloc_pix, exper.yloc_pix )
+            up.pos =	( exper.xloc_pix,  spacingMult * exper.deg2pix(sval)+exper.yloc_pix)
+            down.pos =  ( exper.xloc_pix, -spacingMult * exper.deg2pix(sval)+exper.yloc_pix)
 
             for nflips in range(int(stimulus_duration/fliprate)):
                 # Show stimulus for correct number of "flips"
@@ -181,6 +179,8 @@ class experiment_runner():
             thisStair.addData( iscorrect )
 
             trialNum += 1
+
+        print ('Done. Final intensity: %f' % (numpy.mean( thisStair.reversalIntensities ) ) )
 
         outfile.write( 'height=' + str(stimHeightDeg) + "\n")
         outfile.write ('mean value: %f\t' % (numpy.mean( thisStair.reversalIntensities[2:] ) ) )
