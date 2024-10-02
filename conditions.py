@@ -12,11 +12,13 @@ class experimental_setup():
 		#screensize = 100.0 / 36.0 # pix/mm for Sony Trinitron at 1024x768 (or ~ 768/284)
 		self.screensize = screendim_pix[1] / screendim_mm[1] #84.0 # height is 284 mm, 768 pixels. TODO: what is "/225?"
 		self.distance = distance 
-		self.stim_ecc_deg = target_loc_deg[1] #distance from fixation to center of 'o' in degrees
+		self.stim_ecc_deg = numpy.sqrt(target_loc_deg[0]**2+target_loc_deg[1]**2) #distance from fixation to center of 'o' in degrees
 		self.xloc_fixation_pix = fixation_pos_pix[0] #distance from fixation to ceter of screen in pixels
 		self.yloc_fixation_pix = fixation_pos_pix[1] #distance from fixation to ceter of screen in pixels
-		self.yloc_pix = -distance * numpy.tan( deg2rad(self.stim_ecc_deg))* self.screensize + self.yloc_fixation_pix#y-location of the center of the letter from center of screen
-		self.xloc_pix=0
+		self.xloc_pix = distance * numpy.tan( deg2rad(target_loc_deg[0]))* self.screensize + self.xloc_fixation_pix#y-location of the center of the letter from center of screen
+		self.yloc_pix = distance * numpy.tan( deg2rad(target_loc_deg[1]))* self.screensize + self.yloc_fixation_pix#y-location of the center of the letter from center of screen
+
+		print( self.xloc_pix, self.yloc_pix, self.xloc_fixation_pix, self.yloc_fixation_pix, self.stim_ecc_deg)
 
 	def deg2pix( self, angle ):
 		return numpy.round( self.distance * self.screensize * (numpy.tan ( deg2rad(self.stim_ecc_deg + angle / 2.0)) -

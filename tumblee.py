@@ -15,18 +15,18 @@ fullscr=True # Set to True when not debugging (Ready to run)
 monitor_dims_pix = (1920,1080)
 monitor_dims_mm = (400,225)
 distance_mm = 1080.0
-fixation_pos_pix = (0,450)
-target_loc_deg   = (0,9)
+fixation_pos_pix = (-900,0)
+target_loc_deg   = (15,0)
 ntrials = 30
 stimulus_duration =  0.150  # in sec use -1 for infinite
 mask_duration = 0
 targets = [0,90,180,270]
-condition = "tangential" # "radial", "tangential", or "both"
+stair_start=2
+condition = "both" # "vert", "horiz", or "both"
 
 SubjectName = 'drc_test'
 repeats = 1
-spacings = [1.5, 3.0, 99.0 ]
-#spacings = [3.0]
+spacings = [ 1.8, 3.0, 99 ] # 99=unflanked
 
 # Randomize order of spacings:
 allspacings = numpy.tile( spacings, (1, repeats ))[0]
@@ -57,7 +57,8 @@ class experiment_runner():
         myWin.setMouseVisible(False)
         myWin.setRecordFrameIntervals(True)
 
-        fixation = visual.TextStim(myWin,pos=(0,exper.yloc_fixation_pix),alignHoriz='center',height=9, color=font.contrast, ori=0, font=font.selfont ) 
+        fixation = visual.TextStim(myWin,pos=(exper.xloc_fixation_pix,exper.yloc_fixation_pix),
+                                   alignHoriz='center',height=9, color=font.contrast, ori=0, font=font.selfont )
 
         test_heights = font.let_height_ptfont
 
@@ -72,20 +73,20 @@ class experiment_runner():
         seqD = [targets[i] for i in buildtrialseq( numpy.arange(len(targets)), maxtrials) ]
 
         targ = stimuli_functions.stim_letter( myWin, font.let_height_ptfont, font.contrast, font.selfont, 
-            {'height': test_heights, 'xpos':0.0, 'ypos':exper.yloc_pix, 'text':'E', 'ori':targseq}  )
+            {'height': test_heights, 'xpos':exper.xloc_pix, 'ypos':exper.yloc_pix, 'text':'E', 'ori':targseq}  )
         left = stimuli_functions.stim_letter( myWin, font.let_height_ptfont, font.contrast, font.selfont, 
-            {'xpos':-spacing, 'ypos':exper.yloc_pix, 'text':'E', 'height':test_heights, 'ori':seqL}  )
+            {'xpos':exper.xloc_pix-spacing, 'ypos':exper.yloc_pix, 'text':'E', 'height':test_heights, 'ori':seqL}  )
         right = stimuli_functions.stim_letter( myWin, font.let_height_ptfont, font.contrast, font.selfont, 
-            {'xpos':+spacing, 'ypos':exper.yloc_pix, 'text':'E', 'height':test_heights, 'ori':seqR}  )
+            {'xpos':exper.xloc_pix+spacing, 'ypos':exper.yloc_pix, 'text':'E', 'height':test_heights, 'ori':seqR}  )
 
         up = stimuli_functions.stim_letter( myWin, font.let_height_ptfont, font.contrast, font.selfont, 
-            {'xpos':+spacing, 'ypos':exper.yloc_pix+spacing, 'text':'E', 'height':test_heights, 'ori':seqU}  )
+            {'xpos':exper.xloc_pix+spacing, 'ypos':exper.yloc_pix+spacing, 'text':'E', 'height':test_heights, 'ori':seqU}  )
         down = stimuli_functions.stim_letter( myWin, font.let_height_ptfont, font.contrast, font.selfont, 
-                                {'xpos':+spacing, 'ypos':exper.yloc_pix-spacing, 'text':'E', 'height':test_heights, 'ori':seqD}  )
+                                {'xpos':exper.xloc_pix+spacing, 'ypos':exper.yloc_pix-spacing, 'text':'E', 'height':test_heights, 'ori':seqD}  )
         if spacingMult < 99: # Flanked
-            if condition=="radial":
+            if condition=="horiz":
                 stims = [ targ, left, right] 
-            elif condition=="tangential":
+            elif condition=="vert":
                 stims = [ targ, up, down] 
             elif condition=="both":
                 stims =[ targ, left, right, up, down ]
@@ -113,14 +114,14 @@ class experiment_runner():
         myWin.flip()
         event.waitKeys()
 
-        fixation.setPos( (0,exper.yloc_fixation_pix) )
+        fixation.setPos( (exper.xloc_fixation_pix,exper.yloc_fixation_pix) )
         fixation.setHeight(70)
         fixation.setText( '+' )
         fixation.draw()
         myWin.flip()
         event.waitKeys()
 
-        thisStair = pd.StairHandler(startVal=4, nTrials=50, nUp=1, nDown=3, minVal = 0.01, maxVal=7, stepSizes=[2,1,0.5,0.25,0.125,0.125,0.125,0.125] ) #, stepSizes=[4,2,1,1,1,1,1,1])
+        thisStair = pd.StairHandler(startVal=stair_start, nTrials=50, nUp=1, nDown=3, minVal = 0.01, maxVal=7, stepSizes=[2,1,0.5,0.25,0.125,0.125,0.125,0.125] ) #, stepSizes=[4,2,1,1,1,1,1,1])
 
         done = False
         while not done and trialNum<maxtrials:
