@@ -9,6 +9,8 @@ import sys
 import stims as stimuli_functions
 import conditions
 
+USE_PUPIL_LABS=False
+
 backcol= (  0, 0, 0 ) # Mid-gray
 targcol= ( -1,-1,-1) # Black
 fullscr=True # Set to True when not debugging (Ready to run)
@@ -31,7 +33,6 @@ spacings = [ 1.8, 3.0, 99 ] # 99=unflanked
 # Randomize order of spacings:
 allspacings = numpy.tile( spacings, (1, repeats ))[0]
 allspacings = numpy.random.permutation( allspacings )
-
 
 def buildtrialseq( vals, ntrials ):
 	return numpy.random.permutation( numpy.tile ( vals, int(numpy.ceil( float(ntrials)/len(vals)) )) )[0:ntrials]
@@ -147,11 +148,17 @@ class experiment_runner():
             up.pos =	( exper.xloc_pix,  spacingMult * exper.deg2pix(sval)+exper.yloc_pix)
             down.pos =  ( exper.xloc_pix, -spacingMult * exper.deg2pix(sval)+exper.yloc_pix)
 
+            if USE_PUPIL_LABS:
+                device.send_event("trial_%02d_stim_on"%trialNum)
+
             for nflips in range(int(stimulus_duration/fliprate)):
                 # Show stimulus for correct number of "flips"
                 [stim.draw( targcol ) for stim in stims]
                 fixation.draw()
                 myWin.flip()
+
+            if USE_PUPIL_LABS:
+                device.send_event("trial_%02d_stim_off"%trialNum)
 
             if mask_duration > 0:
                 # Draw mask if desired for appropriate duration. TODO
@@ -208,8 +215,23 @@ class experiment_runner():
         outfile.close()
         myWin.close()
 
+if USE_PUPIL_LABS:
+    from pupil_labs.realtime_api.simple import discover_one_device
+    device = discover_one_device()
+    print(f"Phone IP address: {device.phone_ip}")
+    print(f"Phone name: {device.phone_name}")
+    print(f"Battery level: {device.battery_level_percent}%")
+    print(f"Free storage: {device.memory_num_free_bytes / 1024**3:.1f} GB")
+    print(f"Serial number of connected glasses: {device.module_serial}")
+
+    recording_id = device.recording_start()
+    print(f"Started recording with id {recording_id}")
+    device.send_event("START")
 
 the_experiment = experiment_runner()
 for spacingMult in allspacings:
     print (spacingMult)
     the_experiment.run()
+
+if USE_PUPIL_LABS:
+    device.recording_stop_and_save()
