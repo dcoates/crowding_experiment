@@ -19,12 +19,12 @@ monitor_dims_mm = (400,225)
 distance_mm = 1080.0
 fixation_pos_pix = (-900,0)
 target_loc_deg   = (15,0)
-ntrials = 30
+ntrials = 40
 stimulus_duration =  0.150  # in sec use -1 for infinite
 mask_duration = 0
 targets = [0,90,180,270]
 stair_start=2
-condition = "both" # "vert", "horiz", or "both"
+condition = "vert" # "vert", "horiz", or "both"
 
 SubjectName = 'drc_test'
 repeats = 1
@@ -41,7 +41,7 @@ class experiment_runner():
     def __init__(self):
         return
 
-    def run(self):
+    def run(self,spacingMult):
         global thisStair
         exper = conditions.experimental_setup( monitor_dims_pix, monitor_dims_mm, distance_mm, fixation_pos_pix, target_loc_deg )
 
@@ -191,7 +191,8 @@ class experiment_runner():
         print ('Done. Final intensity: %f' % (numpy.mean( thisStair.reversalIntensities ) ) )
 
         outfile.write( 'height=' + str(stimHeightDeg) + "\n")
-        outfile.write ('mean value: %f\t' % (numpy.mean( thisStair.reversalIntensities[2:] ) ) )
+        meanLast= numpy.mean( thisStair.reversalIntensities[2:] ) 
+        outfile.write ('mean value: %f\t' % (meanLast) ) # Mean skips first two
         outfile.write ('spacingMult: %s\t' % str( spacingMult ) )
         outfile.write ('SubjectName: %s\n' %  SubjectName )
 
@@ -215,23 +216,27 @@ class experiment_runner():
         outfile.close()
         myWin.close()
 
-if USE_PUPIL_LABS:
-    from pupil_labs.realtime_api.simple import discover_one_device
-    device = discover_one_device()
-    print(f"Phone IP address: {device.phone_ip}")
-    print(f"Phone name: {device.phone_name}")
-    print(f"Battery level: {device.battery_level_percent}%")
-    print(f"Free storage: {device.memory_num_free_bytes / 1024**3:.1f} GB")
-    print(f"Serial number of connected glasses: {device.module_serial}")
+        return meanLast
 
-    recording_id = device.recording_start()
-    print(f"Started recording with id {recording_id}")
-    device.send_event("START")
+if __name__ == "__main__":
 
-the_experiment = experiment_runner()
-for spacingMult in allspacings:
-    print (spacingMult)
-    the_experiment.run()
+    if USE_PUPIL_LABS:
+        from pupil_labs.realtime_api.simple import discover_one_device
+        device = discover_one_device()
+        print(f"Phone IP address: {device.phone_ip}")
+        print(f"Phone name: {device.phone_name}")
+        print(f"Battery level: {device.battery_level_percent}%")
+        print(f"Free storage: {device.memory_num_free_bytes / 1024**3:.1f} GB")
+        print(f"Serial number of connected glasses: {device.module_serial}")
 
-if USE_PUPIL_LABS:
-    device.recording_stop_and_save()
+        recording_id = device.recording_start()
+        print(f"Started recording with id {recording_id}")
+        device.send_event("START")
+
+    the_experiment = experiment_runner()
+    for spacingMult in [99]:
+        print (spacingMult)
+        the_experiment.run(spacingMult)
+
+    if USE_PUPIL_LABS:
+        device.recording_stop_and_save()
