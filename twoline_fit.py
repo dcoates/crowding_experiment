@@ -45,7 +45,21 @@ class Solver():
     
     def plot(self):
         plt.plot( self.x, self.y, 'o')
-        plt.plot( self.xr, self.fun_val(self.opt['x'],self.xr), '-')
+        
+        unf=self.opt['x'] [1]
+        cs=self.opt['x'][0]
+
+        if self.dolog:
+            unf=10**unf
+            cs = 10 ** cs
+
+        cs_abs = cs * unf
+        lbl="Unflanked=%0.3f$^o$\ncrit. spac. (nom)=%0.3fx\ncrit. spac. (abs)=%0.3f$^o$" %(unf,cs,cs_abs, )
+            
+        plt.plot( self.xr,( self.fun_val(self.opt['x'],(self.xr) ) ), '-', label=lbl)
+        plt.legend(loc='best')
+        plt.xlabel("Nominal spacing (multiples of size)", size=18)
+        plt.ylabel("Letter size (deg)", size=18)
         
         if self.dolog:
             plt.loglog()
