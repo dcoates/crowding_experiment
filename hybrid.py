@@ -1,6 +1,8 @@
 from tumblee import experiment_runner
+import tumblee
 import numpy as np
 from twoline_fit import Solver,linefn
+import time
 
 USE_PUPIL_LABS=False
 
@@ -9,7 +11,7 @@ UNFLANKED_SPACING=99
 
 NUM_HYBRID_WITHIN=5
 MIN_HYBRID=1.4 # Minimumal nominal spacing
-HYBRID_OUTSIDE_CS=[1.5,2]
+HYBRID_OUTSIDE_CS=[1.5,2,10]
 
 DEBUG=False
 
@@ -60,9 +62,20 @@ while(nidx_cond < num_spacings ):
     else:
         threshold1=the_experiment.run(spacing1)
 
-    trials_x += spacing1 # Add to the list for refitting
-    trials_y += threshold1
+    trials_x += [spacing1] # Add to the list for refitting
+    trials_y += [threshold1]
     nidx_cond += 1
+
+    #p0 = opt # Use last guess to seed new one
+    #solver1=Solver( np.array(trials_x), np.array(trials_y), linefn, True )
+
+outfilename = "results/%s_%s_%s_%s.csv" % (tumblee.SubjectName, tumblee.condition, "summary", time.strftime("%m%d%Y_%H%M", time.localtime() ) )
+outfile = open(outfilename, "wt")
+for ncond in range(len(trials_x)):
+    outfile.writelines("%f,%f\n"%(trials_x[ncond],trials_y[ncond]) )
+outfile.close()
+print (trials_x, trials_y )
+
 
 if USE_PUPIL_LABS:
     device.recording_stop_and_save()
