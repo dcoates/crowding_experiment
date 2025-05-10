@@ -37,6 +37,16 @@ allspacings = numpy.random.permutation( allspacings )
 def buildtrialseq( vals, ntrials ):
 	return numpy.random.permutation( numpy.tile ( vals, int(numpy.ceil( float(ntrials)/len(vals)) )) )[0:ntrials]
 
+class fixation_class():
+    def __init__(self,stims):
+        self.stims=stims
+        return
+
+    def draw(self):
+        for stim1 in self.stims:
+            stim1.draw()
+        return
+
 class experiment_runner():
     def __init__(self):
         return
@@ -58,8 +68,8 @@ class experiment_runner():
         myWin.setMouseVisible(False)
         myWin.setRecordFrameIntervals(True)
 
-        fixation = visual.TextStim(myWin,pos=(exper.xloc_fixation_pix,exper.yloc_fixation_pix),
-                                   alignHoriz='center',height=9, color=font.contrast, ori=0, font=font.selfont )
+        fixation = fixation_class ([visual.TextStim(myWin,pos=(exper.xloc_fixation_pix,exper.yloc_fixation_pix),
+                                   alignHoriz='center',height=9, color=font.contrast, ori=0, font=font.selfont )] )
 
         test_heights = font.let_height_ptfont
 
@@ -99,10 +109,10 @@ class experiment_runner():
         trialNum=0
 
         # Calibrate by seeing how long 100 redraws takes
-        fixation.setHeight(30)
-        fixation.setPos( (0,0) )
+        fixation.stims[0].setHeight(30)
+        fixation.stims[0].setPos( (0,0) )
 
-        fixation.setText( 'Calibrating monitor. Please wait.' )
+        fixation.stims[0].setText( 'Calibrating monitor. Please wait.' )
         for i in numpy.arange(100):
             fixation.draw()
             myWin.flip()
@@ -110,14 +120,23 @@ class experiment_runner():
         fliprate = numpy.mean( savetimes[20:80] )
         print ('fliprate=%f ms (%f Hz)' % (fliprate,1.0/fliprate) )
 
-        fixation.setText('Ready. Press a key.')
+        fixation.stims[0].setText('Ready. Press a key.')
         fixation.draw()
         myWin.flip()
         event.waitKeys()
 
-        fixation.setPos( (exper.xloc_fixation_pix,exper.yloc_fixation_pix) )
-        fixation.setHeight(70)
-        fixation.setText( '+' )
+        if len(numpy.where(target_loc_deg)[0] )>0:
+            # Any non-zer dimension for fixation location?
+            fixation.stims[0].setPos( (exper.xloc_fixation_pix,exper.yloc_fixation_pix) )
+            fixation.stims[0].setHeight(70)
+            fixation.stims[0].setText( '+' )
+        else:
+            lineNE=visual.Line(myWin, (40,40), (100,100), units='pix', lineColor='black', color=font.contrast )
+            lineSE=visual.Line(myWin, (40,-40), (100,-100), units='pix', lineColor='black', color=font.contrast )
+            lineNW=visual.Line(myWin, (-40,40), (-100,100), units='pix', lineColor='black', color=font.contrast )
+            lineSW=visual.Line(myWin, (-40,-40), (-100,-100), units='pix', lineColor='black', color=font.contrast )
+            fixation = fixation_class ([lineNE, lineSE, lineNW, lineSW] )
+
         fixation.draw()
         myWin.flip()
         event.waitKeys()
