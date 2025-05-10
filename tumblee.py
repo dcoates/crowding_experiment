@@ -18,8 +18,7 @@ monitor_dims_pix = (1920,1080)
 monitor_dims_mm = (400,225)
 distance_mm = 1080.0
 fixation_pos_pix = (-900,0)
-target_loc_deg   = (15,0)
-fixation_x_linewidth = 2.5
+target_loc_deg   = (0,0)
 ntrials = 40
 stimulus_duration =  0.150  # in sec use -1 for infinite
 mask_duration = 0
@@ -30,6 +29,10 @@ condition = "vert" # "vert", "horiz", or "both"
 SubjectName = 'drc_test'
 repeats = 1
 spacings = [ 1.8, 3.0, 99 ] # 99=unflanked
+
+fixation_x_linewidth = 2.5
+fixation_x_inner = 40
+fixation_x_outer = 100
 
 # Randomize order of spacings:
 allspacings = numpy.tile( spacings, (1, repeats ))[0]
@@ -132,10 +135,10 @@ class experiment_runner():
             fixation.stims[0].setHeight(70)
             fixation.stims[0].setText( '+' )
         else:
-            lineNE=visual.Line(myWin, (40,40), (100,100), units='pix', lineColor='black', color=font.contrast, lineWidth=fixation_x_linewidth )
-            lineSE=visual.Line(myWin, (40,-40), (100,-100), units='pix', lineColor='black', color=font.contrast, lineWidth=fixation_x_linewidth )
-            lineNW=visual.Line(myWin, (-40,40), (-100,100), units='pix', lineColor='black', color=font.contrast, lineWidth=fixation_x_linewidth )
-            lineSW=visual.Line(myWin, (-40,-40), (-100,-100), units='pix', lineColor='black', color=font.contrast, lineWidth=fixation_x_linewidth )
+            lineNE=visual.Line(myWin, (fixation_x_inner,fixation_x_inner), (fixation_x_outer,fixation_x_outer), units='pix', lineColor='black', color=font.contrast, lineWidth=fixation_x_linewidth )
+            lineSE=visual.Line(myWin, (fixation_x_inner,-fixation_x_inner), (fixation_x_outer,-fixation_x_outer), units='pix', lineColor='black', color=font.contrast, lineWidth=fixation_x_linewidth )
+            lineNW=visual.Line(myWin, (-fixation_x_inner,fixation_x_inner), (-fixation_x_outer,fixation_x_outer), units='pix', lineColor='black', color=font.contrast, lineWidth=fixation_x_linewidth )
+            lineSW=visual.Line(myWin, (-fixation_x_inner,-fixation_x_inner), (-fixation_x_outer,-fixation_x_outer), units='pix', lineColor='black', color=font.contrast, lineWidth=fixation_x_linewidth )
             fixation = fixation_class ([lineNE, lineSE, lineNW, lineSW] )
 
         fixation.draw()
