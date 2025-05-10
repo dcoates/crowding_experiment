@@ -19,6 +19,7 @@ monitor_dims_mm = (400,225)
 distance_mm = 1080.0
 fixation_pos_pix = (-900,0)
 target_loc_deg   = (15,0)
+fixation_x_linewidth = 2.5
 ntrials = 40
 stimulus_duration =  0.150  # in sec use -1 for infinite
 mask_duration = 0
@@ -131,10 +132,10 @@ class experiment_runner():
             fixation.stims[0].setHeight(70)
             fixation.stims[0].setText( '+' )
         else:
-            lineNE=visual.Line(myWin, (40,40), (100,100), units='pix', lineColor='black', color=font.contrast )
-            lineSE=visual.Line(myWin, (40,-40), (100,-100), units='pix', lineColor='black', color=font.contrast )
-            lineNW=visual.Line(myWin, (-40,40), (-100,100), units='pix', lineColor='black', color=font.contrast )
-            lineSW=visual.Line(myWin, (-40,-40), (-100,-100), units='pix', lineColor='black', color=font.contrast )
+            lineNE=visual.Line(myWin, (40,40), (100,100), units='pix', lineColor='black', color=font.contrast, lineWidth=fixation_x_linewidth )
+            lineSE=visual.Line(myWin, (40,-40), (100,-100), units='pix', lineColor='black', color=font.contrast, lineWidth=fixation_x_linewidth )
+            lineNW=visual.Line(myWin, (-40,40), (-100,100), units='pix', lineColor='black', color=font.contrast, lineWidth=fixation_x_linewidth )
+            lineSW=visual.Line(myWin, (-40,-40), (-100,-100), units='pix', lineColor='black', color=font.contrast, lineWidth=fixation_x_linewidth )
             fixation = fixation_class ([lineNE, lineSE, lineNW, lineSW] )
 
         fixation.draw()
